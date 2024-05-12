@@ -2,4 +2,20 @@ import tkinter
 import customtkinter
 
 customtkinter.set_appearance_mode("light")
-customtkinter.set_default_color_theme("dark
+customtkinter.set_default_color_theme("dark-blue")
+
+root = tkinter.Tk()
+root = customtkinter.CTk()
+root.geometry("500x500")
+
+special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
+label = customtkinter.CTkLabel(root, text="Welcome to Admin!", font=special_font)
+label.pack(pady=0, padx=0)
+label.place(relx=0.5, rely=0.5, anchor="center")
+
+def open_admin_page():
+    print("test")
+
+
+
+root.mainloop()
