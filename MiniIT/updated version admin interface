@@ -1,0 +1,20 @@
+import customtkinter
+
+customtkinter.set_apperance_mode("light")
+customtkinter.set_apperance_mode("dark")
+
+import tkinter as tk
+
+def fullscreen(window):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    if screen_width / screen_height > 16/9:
+        height = screen_height
+        width = int(height *16/9)
+    else:
+        width = screen_width
+        height = int(width * 9/16)
+
+    window.geometry(f"{width}
+
