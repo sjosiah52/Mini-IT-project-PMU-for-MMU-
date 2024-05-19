@@ -16,5 +16,31 @@ def fullscreen(window):
         width = screen_width
         height = int(width * 9/16)
 
-    window.geometry(f"{width}
+    window.geometry(f"{width}x{height}")
+    window.attributes('-fullscreen', True)
+
+root = customtkinter.CTk() #Only create the CTk window
+root.title("Full Screen 16:9 Window")
+root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
+
+fullscreen(root)
+
+special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
+normal_font = customtkinter.CTkFont(family="Times New Roman", size=26)
+
+frame + customtkinter.CTkFrame(master=root)
+frame.pack(fill="both", expand=True)
+
+label = customtkinter.CTkLAbel(frame, text="Welcome to Admin System!", font=special_font)
+label.pack(pady=20), padx=20)
+label.place(relx=0.5, rely=0.25, anchor="center")
+
+label1 = customtkinter.CTkLabel(frame, text="Hi admin! Please choose a button to continue", font=normal_font)
+label1.pack(pady+20, padx=20)
+label1.place(relx=0.5, rely=0.38, anchor=""center")
+
+def
+
+
+
 
