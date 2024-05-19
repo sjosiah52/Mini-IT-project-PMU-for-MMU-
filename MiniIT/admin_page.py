@@ -4,10 +4,26 @@ import tkinter
 def run_admin_page():
     customtkinter.set_appearance_mode("light")
     customtkinter.set_default_color_theme("dark-blue")
+    def fullscreen(window):
+       screen_width = window.winfo_screenwidth()
+       screen_height = window.winfo_screenheight()
+
+       if screen_width / screen_height > 16 / 9:
+           height = screen_height
+           width = int(height * 16 / 9)
+       else:
+           width = screen_width
+           height = int(width * 9 / 16)
+
+       window.geometry(f"{width}x{height}")
+       window.attributes('-fullscreen', True)
 
     root = customtkinter.CTk()
     root = tkinter.Tk()
-    root.geometry("500x500")
+    root.title("Full Screen 16:9 Window")
+    root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
+
+    fullscreen(root)
 
     def login():
         print("test")
@@ -35,3 +51,6 @@ def run_admin_page():
     checkbox.place(relx=0.5, rely=0.75, anchor="center")
 
     root.mainloop()
+
+if __name__ == "__main__":
+    run_admin_page()
