@@ -1,7 +1,6 @@
-import tkinter
 import customtkinter
-import admin_page
-import user_page
+from admin_page import run_admin_page
+from user_page import run_user_page
 
 customtkinter.set_appearance_mode("light")
 customtkinter.set_default_color_theme("dark-blue")
@@ -19,20 +18,17 @@ def fullscreen(window):
     window.geometry(f"{width}x{height}")
     window.attributes('-fullscreen', True)
 
-root = customtkinter.CTk()  # Only create the CTk window
+root = customtkinter.CTk()
 root.title("Full Screen 16:9 Window")
 root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 
 fullscreen(root)
 
-root = customtkinter.CTk()
-root = tkinter.Tk()
-
 def callback_ap():
-    admin_page.run_admin_page()
+    run_admin_page()
 
 def callback_up():
-    user_page.run_user_page()
+    run_user_page()
 
 admin_login = customtkinter.CTkButton(root, text="Admin", command=callback_ap)
 admin_login.place(relx="0.5", rely="0.4", anchor="center")
