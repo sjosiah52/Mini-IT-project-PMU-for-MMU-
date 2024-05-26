@@ -1,5 +1,5 @@
 import customtkinter
-import tkinter
+import user_page2
 
 def run_user_page():
     customtkinter.set_appearance_mode("light")
@@ -28,6 +28,9 @@ def run_user_page():
     def login():
         print("test")
 
+    def callback_up2():
+        user_page2.run_user_page2()
+
     special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
     frame = customtkinter.CTkFrame(master=root)
@@ -49,6 +52,9 @@ def run_user_page():
 
     checkbox = customtkinter.CTkCheckBox(master=frame, text="Remember Me")
     checkbox.place(relx=0.5, rely=0.75, anchor="center")
+
+    button1 = customtkinter.CTkButton(master=frame, text="Click here to sign up.", command=callback_up2)
+    button1.place(relx=0.5, rely= 0.87, anchor="center")
 
     root.mainloop()
 
