@@ -26,4 +26,32 @@ def run_user_page2():
       password = entry_password.get()
 
       data = {
+          "mmu_id": mmu_id,
+          "name": name,
+          "phone": phone,
+          "password": password
+      }
+
+      try:
+          response = requests.post("http://127.0.0.1:5001/signup", json=data)
+          if response.status_code == 201:
+              label_message.configure(text="Sign-up successful", text_color="green")
+          elif response.status_code == 409:
+             label_message.configure(text="User already exists", text_color="red)
+          else:
+              label_message.configure(text="Sign-up failed", text_color="red")
+      except Exception as e:
+          label_message.configure(text=f"An error occured: {e}", text_color="red")
+
+root = customtkinter.CTk() #Only create the CTk window
+root.title("Full Screen 16:9 WI=indow")
+root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
+
+fullscreen(root)
+
+
+
+
+
+
 
