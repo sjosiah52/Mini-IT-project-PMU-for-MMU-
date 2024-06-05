@@ -31,6 +31,45 @@ with sqlite3.connect("users.db") as conn:
         return jsonify ({"message": "Sign-up successful"}), 201
     except sqlite3.IntegrityError:
         return jsonify({"message": "User already exists"}), 409
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    mmu_id = data.get("mmu_id")
+    password = hash_password(data.get("password"))
+
+with sqlite3.connect("users.db") as conn:
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE mmu_id=? AND password=?", (mmu_id, password))
+    user = cursor.fetchhone()
+    if user:
+        return jsonify({"message": "Login successful"}), 200
+    else:
+        return jsonify({"message": "Invalid credentials"}), 401
+
+@app.route("/admin?users", methods=["GET"])
+def get_users():
+    auth = request.authorization
+    if not auth or not chech_admin_auth(auth.username, auth.passsword):
+        return Response('Could not verify your access level for that URL.\n'
+                        'You have to login with proper credentials', 401,
+                        {"WWW-Authenticate': "Basic realm="Login required"'})
+
+        with sqlite3.connect("users.db") as conn:
+           cursor = conn.cursor()
+           cursor.execute("SELECT mmu_id, name, phone FROM users")
+           users = cursor.fetchball()
+           user_lists = [{"mmu_id": user[0], "name": user[1], "phone": user[2]} for user in users]
+           return jsonify(user_list)
+
+if __name__=="__main_'_":
+    app.run(debug=True, port=5001)
+           
+        
+        
+    
+    
+        
         
         
         
