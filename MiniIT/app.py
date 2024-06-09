@@ -1,5 +1,4 @@
-import dns.resolver
-import smtplib
+import requests
 from flask import Flask, request, jsonify, Response, render_template, redirect, url_for
 import sqlite3
 import hashlib
@@ -16,31 +15,10 @@ def check_admin_auth(username, password):
     return username == ADMIN_USERNAME and hash_password(password) == ADMIN_PASSWORD
 
 def verify_email(email):
-    domain = email.split('@')[1]
-    try:
-        mx_records = dns.resolver.resolve(domain, 'MX')
-        mx_record = mx_records[0].exchange.to_text()
-        server = smtplib.SMTP()
-        server.set_debuglevel(0)
-        server.connect(mx_record)
-        server.helo(server.local_hostname)  # server.local_hostname(Get local server hostname)
-        server.mail('me@domain.com')  # This should be a dummy email address
-        code, message = server.rcpt(email)
-        server.quit()
-        if code == 250:
-            return True
-    except Exception as e:
-        print(f"Failed to verify email: {e}")
-    return False
-
-# Hardcoded email address for testing
-test_email = "1221109534@student.mmu.edu.my"
-
-# Call the verify_email function with the test email address
-if verify_email(test_email):
-    print("Email is valid")
-else:
-    print("Email is invalid")
+    API_KEY = '1852a73007a78997b959aa5191853dcbf45a1a9c'
+    response = requests.get(f'https://api.hunter.io/v2/email-verifier?email={email}&api_key={API_KEY}')
+    data = response.json()
+    return data['data']['status'] == 'valid'
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -51,9 +29,7 @@ def signup():
     password = hash_password(data.get("password"))
 
     email = f"{mmu_id}@student.mmu.edu.my"
-    print(f"Validating email: {email}")  # Debug statement
     if not verify_email(email):
-        print("Invalid MMU ID email")
         return jsonify({"message": "Invalid MMU ID"}), 400
 
     with sqlite3.connect("users.db") as conn:
@@ -62,11 +38,9 @@ def signup():
             cursor.execute("INSERT INTO users (mmu_id, name, phone, password) VALUES (?, ?, ?, ?)",
                            (mmu_id, name, phone, password))
             conn.commit()
-            print("User added successfully")
             return jsonify({"message": "Sign-up successful"}), 201
         except sqlite3.IntegrityError:
-            print("User already exists")
-            return jsonify({"message": "User already exists"}), 409
+                return jsonify({"message": "User already exists"}), 409
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -122,11 +96,6 @@ def delete_user():
 @app.route("/admin/delete_form")
 def delete_form():
     return render_template('delete_form.html')
-
-@app.route("/validate_email/<email>", methods=["GET"])
-def validate_email(email):
-    valid = verify_email(email)
-    return jsonify({"valid": valid}), 200 if valid else 400
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
