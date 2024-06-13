@@ -2,13 +2,14 @@ import tkinter as tk
 import customtkinter as ctk
 from tkintermapview import TkinterMapView
 import requests
+import math  # Import the math module for mathematical functions
 
 # Initialize customtkinter
 ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
-# Your OpenRouteService API key
-ORS_API_KEY = "your_openrouteservice_api_key"
+# Your OpenCage API key
+OPENCAGE_API_KEY = "8ff4cd18db4e436c90a5fc5e06574570"
 
 class App(ctk.CTk):
     def __init__(self):
@@ -68,6 +69,7 @@ class App(ctk.CTk):
         # Book Now Button
         book_button = ctk.CTkButton(form_frame, text="Book Now", command=self.book_now, fg_color="#2600ff", hover_color="#555555")
         book_button.pack(pady=20)
+        
 
         # Map Frame
         map_frame = ctk.CTkFrame(main_frame)
@@ -79,9 +81,6 @@ class App(ctk.CTk):
 
         # Set the tile server
         self.gmap_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-
-        # Set the address and add a marker
-        self.gmap_widget.set_address("MMU CYBERJAYA", marker=True)
 
         # Route Info
         self.route_info_label = ctk.CTkLabel(form_frame, text="", font=ctk.CTkFont(size=14))
@@ -114,91 +113,61 @@ class App(ctk.CTk):
             self.gmap_widget.set_marker(*pickup_coords, text="Pickup")
             self.gmap_widget.set_marker(*destination_coords, text="Destination")
 
-            # Get route information and path coordinates
-            route_info, path_coordinates = self.get_route_info(pickup_coords, destination_coords)
+            # Calculate and display total distance
+            total_distance = self.calculate_total_distance(pickup_coords, destination_coords)
 
-            if path_coordinates:
-                self.gmap_widget.set_path(path_coordinates)
-
-            self.route_info_label.configure(text=route_info)
+            # Display route information
+            self.route_info_label.configure(text=f"Total Distance: {total_distance:.2f} km")
 
     def get_coordinates(self, address):
         try:
-            response = requests.get(
-                f"https://nominatim.openstreetmap.org/search?format=json&q={address}"
-            )
+            # Construct the geocoding API request URL
+            url = f"https://api.opencagedata.com/geocode/v1/json?q={address}&key={OPENCAGE_API_KEY}&language=en&pretty=1"
+            
+            # Send the request
+            response = requests.get(url)
             response_json = response.json()
-            if response_json:
-                return float(response_json[0]['lat']), float(response_json[0]['lon'])
+
+            # Extract latitude and longitude from the response
+            if response_json['results']:
+                lat = response_json['results'][0]['geometry']['lat']
+                lng = response_json['results'][0]['geometry']['lng']
+                return lat, lng
             else:
+                print(f"Geocoding failed for {address}")
                 return None
         except Exception as e:
             print(f"Error getting coordinates: {e}")
             return None
 
-    def get_route_info(self, start_coords, end_coords):
+    def calculate_total_distance(self, start_coords, end_coords):
         try:
-            headers = {
-                'Authorization': ORS_API_KEY,
-                'Content-Type': 'application/json'
-            }
-            body = {
-                "coordinates": [list(start_coords), list(end_coords)],
-                "format": "geojson"
-            }
-            print(f"Requesting route info with body: {body}")
-            
-            response = requests.post(
-                "https://api.openrouteservice.org/v2/directions/driving-car",
-                json=body,
-                headers=headers
-            )
-            
-            print(f"Response status code: {response.status_code}")
-            print(f"Response content: {response.content}")
+            # Calculate distance using Haversine formula
+            lat1, lon1 = start_coords
+            lat2, lon2 = end_coords
 
-            # Check if the response status code is 200 (OK)
-            if response.status_code != 200:
-                print(f"HTTP Error: {response.status_code} - {response.reason}")
-                return "Unable to retrieve route info", None
-            
-            response_json = response.json()
-            
-            print(f"Response JSON: {response_json}")
+            # Radius of the Earth in km
+            R = 6371.0
 
-            # Check if the response JSON contains the expected data
-            if 'features' not in response_json or not response_json['features']:
-                print(f"Unexpected response structure: {response_json}")
-                return "Unable to retrieve route info", None
+            # Convert latitude and longitude from degrees to radians
+            lat1_rad = math.radians(lat1)
+            lon1_rad = math.radians(lon1)
+            lat2_rad = math.radians(lat2)
+            lon2_rad = math.radians(lon2)
 
-            # Extract distance and duration
-            distance = response_json['features'][0]['properties']['segments'][0]['distance'] / 1000  # in km
-            duration = response_json['features'][0]['properties']['segments'][0]['duration'] / 60  # in minutes
+            # Calculate differences in latitude and longitude
+            dlon = lon2_rad - lon1_rad
+            dlat = lat2_rad - lat1_rad
 
-            # Extract path coordinates
-            path_coordinates = [
-                (coord[1], coord[0]) for coord in response_json['features'][0]['geometry']['coordinates']
-            ]
+            # Haversine formula to calculate distance
+            a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            distance = R * c
 
-            # Calculate total time based on average speed
-            average_speed_kmh = 40  # km/h
-            estimated_time_minutes = (distance / average_speed_kmh) * 60  # in minutes
-
-            route_info = f"Distance: {distance:.2f} km\nDuration: {duration:.2f} min\nEstimated Total Time: {estimated_time_minutes:.2f} min"
-
-            return route_info, path_coordinates
-        except requests.RequestException as e:
-            print(f"HTTP Request failed: {e}")
-            return "Unable to retrieve route info", None
-        except ValueError as e:
-            print(f"JSON Parsing failed: {e}")
-            return "Unable to retrieve route info", None
-        except KeyError as e:
-            print(f"Expected data not found in response: {e}")
-            return "Unable to retrieve route info", None
+            return distance
         except Exception as e:
-            print(f"Unexpected error: {e}")
-            return "Unable to retrieve route info", None
+            print(f"Error calculating distance: {e}")
+            return None
 
 if __name__ == "__main__":
     app = App()
