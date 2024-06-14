@@ -8,4 +8,11 @@ def init2_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             mmu_id TEXT NOT NULL UNIQUE,
             ic_number TEXT NOT NULL,
-            vehicle 
+            vehicle_registration_number TEXT NOT NULL,
+            password TEXT NOT NULL
+        )
+        """)
+        conn.commit()
+
+if __name__== "__main__":
+    init2_db()
