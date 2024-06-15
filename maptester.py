@@ -31,7 +31,10 @@ class App(ctk.CTk):
 
         nav_buttons = ["Home", "About", "Services", "Contact"]
         for btn_text in nav_buttons:
-            btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=lambda text=btn_text: self.nav_command(text), fg_color="#ff0000", hover_color="#555555")
+            if btn_text == "Contact":
+                btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=self.show_contact_info, fg_color="#ff0000", hover_color="#555555")
+            else:
+                btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=lambda text=btn_text: self.nav_command(text), fg_color="#ff0000", hover_color="#555555")
             btn.pack(side="left", padx=5, pady=5)
 
         # Main Content
@@ -98,6 +101,24 @@ class App(ctk.CTk):
 
     def nav_command(self, text):
         print(f"Navigation button '{text}' clicked")
+
+    def show_contact_info(self):
+        contact_info = (
+            "Contact Us:\n\n"
+            "Support Email: support@pickupformmu.com\n"
+            "Support Phone: +60 123-456-789\n"
+            "Office Address: 123 MMU Street, Cyberjaya, Malaysia\n"
+            "Operating Hours: 9 AM - 6 PM, Monday to Friday"
+        )
+        contact_window = ctk.CTkToplevel(self)
+        contact_window.title("Contact Information")
+        contact_window.geometry("400x300")
+        
+        contact_label = ctk.CTkLabel(contact_window, text=contact_info, font=ctk.CTkFont(size=14), justify="left")
+        contact_label.pack(padx=20, pady=20)
+        
+        back_button = ctk.CTkButton(contact_window, text="Back", command=contact_window.destroy, fg_color="#2600ff", hover_color="#555555")
+        back_button.pack(pady=10)
 
     def book_now(self):
         pickup = self.pickup_entry.get()
@@ -180,6 +201,7 @@ class App(ctk.CTk):
             # Haversine formula to calculate distance
             a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
             c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            distance = R
             distance = R * c
 
             return distance
@@ -188,7 +210,7 @@ class App(ctk.CTk):
             return None
 
     def calculate_price(self, distance):
-        base_fare = 5.00  # Base fare in Ringgit Malaysia (RM)
+        base_fare = 5.0  # Base fare in Ringgit Malaysia (RM)
         rate_per_km = 2.50  # Rate per kilometer in Ringgit Malaysia (RM)
         price = base_fare + (rate_per_km * distance)
         return price
