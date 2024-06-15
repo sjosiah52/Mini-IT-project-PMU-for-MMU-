@@ -59,12 +59,12 @@ class App(ctk.CTk):
         self.destination_entry = ctk.CTkEntry(form_frame, width=300)
         self.destination_entry.pack(pady=5)
 
-        # Promo Code
-        promo_label = ctk.CTkLabel(form_frame, text="Promo Code:")
-        promo_label.pack(anchor="w", pady=5)
+        # Price Label
+        price_label = ctk.CTkLabel(form_frame, text="Price:")
+        price_label.pack(anchor="w", pady=5)
 
-        self.promo_entry = ctk.CTkEntry(form_frame, width=300)
-        self.promo_entry.pack(pady=5)
+        self.price_entry = ctk.CTkEntry(form_frame, width=300)
+        self.price_entry.pack(pady=5)
 
         # Book Now Button
         book_button = ctk.CTkButton(form_frame, text="Book Now", command=self.book_now, fg_color="#2600ff", hover_color="#555555")
@@ -86,6 +86,9 @@ class App(ctk.CTk):
         self.route_info_label = ctk.CTkLabel(form_frame, text="", font=ctk.CTkFont(size=14))
         self.route_info_label.pack(pady=10)
 
+        # List to keep track of markers
+        self.markers = []
+
         # Footer
         footer_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="#333")
         footer_frame.pack(side="bottom", fill="x")
@@ -99,25 +102,40 @@ class App(ctk.CTk):
     def book_now(self):
         pickup = self.pickup_entry.get()
         destination = self.destination_entry.get()
-        promo_code = self.promo_entry.get()
-
-        print(f"Booking Details:\nPickup: {pickup}\nDestination: {destination}\nPromo Code: {promo_code}")
+        
+        print(f"Booking Details:\nPickup: {pickup}\nDestination: {destination}")
 
         # Get coordinates for pickup and destination
         pickup_coords = self.get_coordinates(pickup)
         destination_coords = self.get_coordinates(destination)
 
         if pickup_coords and destination_coords:
+            # Clear previous markers
+            self.clear_markers()
+
             # Display the route on the map
             self.gmap_widget.set_position(*pickup_coords)
-            self.gmap_widget.set_marker(*pickup_coords, text="Pickup")
-            self.gmap_widget.set_marker(*destination_coords, text="Destination")
+            pickup_marker = self.gmap_widget.set_marker(*pickup_coords, text="Pickup")
+            destination_marker = self.gmap_widget.set_marker(*destination_coords, text="Destination")
+            
+            # Keep track of the markers
+            self.markers.extend([pickup_marker, destination_marker])
 
             # Calculate and display total distance
             total_distance = self.calculate_total_distance(pickup_coords, destination_coords)
 
             # Display route information
             self.route_info_label.configure(text=f"Total Distance: {total_distance:.2f} km")
+
+            # Calculate and display price
+            price = self.calculate_price(total_distance)
+            self.price_entry.delete(0, tk.END)
+            self.price_entry.insert(0, f"RM {price:.2f}")
+
+    def clear_markers(self):
+        for marker in self.markers:
+            marker.delete()
+        self.markers = []
 
     def get_coordinates(self, address):
         try:
@@ -168,6 +186,12 @@ class App(ctk.CTk):
         except Exception as e:
             print(f"Error calculating distance: {e}")
             return None
+
+    def calculate_price(self, distance):
+        base_fare = 5.00  # Base fare in Ringgit Malaysia (RM)
+        rate_per_km = 2.50  # Rate per kilometer in Ringgit Malaysia (RM)
+        price = base_fare + (rate_per_km * distance)
+        return price
 
 if __name__ == "__main__":
     app = App()
