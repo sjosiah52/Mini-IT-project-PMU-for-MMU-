@@ -2,7 +2,7 @@ import tkinter as tk
 import customtkinter as ctk
 from tkintermapview import TkinterMapView
 import requests
-import math  # Import the math module for mathematical functions
+import math
 
 # Initialize customtkinter
 ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
@@ -72,7 +72,16 @@ class App(ctk.CTk):
         # Book Now Button
         book_button = ctk.CTkButton(form_frame, text="Book Now", command=self.book_now, fg_color="#2600ff", hover_color="#555555")
         book_button.pack(pady=20)
-        
+
+        # Route Info
+        self.route_info_frame = ctk.CTkFrame(form_frame)
+        self.route_info_frame.pack(pady=10)
+
+        self.route_info_label = ctk.CTkLabel(self.route_info_frame, text="", font=ctk.CTkFont(size=14))
+        self.route_info_label.pack()
+
+        self.time_info_label = ctk.CTkLabel(self.route_info_frame, text="", font=ctk.CTkFont(size=14))
+        self.time_info_label.pack()
 
         # Map Frame
         map_frame = ctk.CTkFrame(main_frame)
@@ -84,10 +93,6 @@ class App(ctk.CTk):
 
         # Set the tile server
         self.gmap_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-
-        # Route Info
-        self.route_info_label = ctk.CTkLabel(form_frame, text="", font=ctk.CTkFont(size=14))
-        self.route_info_label.pack(pady=10)
 
         # List to keep track of markers
         self.markers = []
@@ -144,14 +149,19 @@ class App(ctk.CTk):
 
             # Calculate and display total distance
             total_distance = self.calculate_total_distance(pickup_coords, destination_coords)
+            if total_distance is not None:
+                self.route_info_label.configure(text=f"Total Distance: {total_distance:.2f} km")
 
-            # Display route information
-            self.route_info_label.configure(text=f"Total Distance: {total_distance:.2f} km")
+                # Calculate and display total time
+                average_speed = 30  # Assuming an average speed of 30 km/h
+                total_time_hours = total_distance / average_speed
+                total_time_minutes = total_time_hours * 60
+                self.time_info_label.configure(text=f"Estimated Time: {total_time_minutes:.2f} minutes")
 
-            # Calculate and display price
-            price = self.calculate_price(total_distance)
-            self.price_entry.delete(0, tk.END)
-            self.price_entry.insert(0, f"RM {price:.2f}")
+                # Calculate and display price
+                price = self.calculate_price(total_distance)
+                self.price_entry.delete(0, tk.END)
+                self.price_entry.insert(0, f"RM {price:.2f}")
 
     def clear_markers(self):
         for marker in self.markers:
@@ -185,6 +195,7 @@ class App(ctk.CTk):
             lat1, lon1 = start_coords
             lat2, lon2 = end_coords
 
+
             # Radius of the Earth in km
             R = 6371.0
 
@@ -201,7 +212,6 @@ class App(ctk.CTk):
             # Haversine formula to calculate distance
             a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
             c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-            distance = R
             distance = R * c
 
             return distance
