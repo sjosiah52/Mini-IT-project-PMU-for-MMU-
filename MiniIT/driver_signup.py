@@ -6,9 +6,27 @@ customtkinter.set_appearance_mode("light")
 customtkinter.set_default_color_theme("dark-blue")
 
 def run_driver_signup():
-    root = customtkinter.CTk()
-    root.geometry("500x600")
+    def fullscreen(window):
+            screen_width = window.winfo_screenwidth()
+            screen_height = window.winfo_screenheight()
 
+            if screen_width / screen_height > 16/9:
+                height = screen_height
+                width = int(height *16/9)
+            else:
+                width = screen_width
+                height = int(width *9/16)
+
+             window.geometry(f"{width}x{height}")
+             window.attributes('-fullscreen', True)
+        
+    root = customtkinter.CTk()
+    root.geometry("500x500")
+    root.title("Full Screen 16:9 Window")
+    root.bind("<Escape>" lambda e: root.attributes('-fullscreen', False))
+
+    fullscreen(root)
+    
     def signup():
         mmuid = entry_mmuid.get()
         icnumber = entry_icnumber.get()
@@ -18,12 +36,13 @@ def run_driver_signup():
         email = f"{mmuid}@student.mmu.edu.my"
         print(f"Validating email: {email}")
 
-        data = {
+        def validate_and_sign_up():
+            data = {
             "mmu_id": mmuid,
             "ic_number": icnumber,
             "vehicle_registration_number": vehicleregistrationnumber,
             "password": password
-        }
+            }
 
          try:
              response = requests.post("http://127.0.0.1:5001/driver_signup", json=data)
@@ -37,6 +56,8 @@ def run_driver_signup():
                  label_message.configure(text="Sign-up failed", text_color="red")
         except requests.exceptions.RequestExcept as e:
              label_message.configure(text=f"An error occured: {str(e)}", text_color="red")
+
+             threading.Thread(target=validate_and_signup).start()
             
     special_font = customtkinter.CTkfont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
