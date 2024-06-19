@@ -12,8 +12,8 @@ ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 OPENCAGE_API_KEY = "8ff4cd18db4e436c90a5fc5e06574570"
 
 class App(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+    def _init_(self):
+        super()._init_()
 
         self.title("Pick-Up For MMU")
         self.geometry("1200x800")  # Adjusted to fit the map and form together
@@ -210,7 +210,7 @@ class App(ctk.CTk):
             dlat = lat2_rad - lat1_rad
 
             # Haversine formula to calculate distance
-            a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+            a = math.sin(dlat / 2)*2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)*2
             c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
             distance = R * c
 
@@ -225,6 +225,6 @@ class App(ctk.CTk):
         price = base_fare + (rate_per_km * distance)
         return price
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     app = App()
     app.mainloop()
