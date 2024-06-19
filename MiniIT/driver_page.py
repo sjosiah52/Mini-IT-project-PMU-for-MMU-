@@ -59,12 +59,39 @@ def login():
 
       threading.Thread(target=send_request).start()
 
-def callback_dp2():
+    def callback_dp2():
     driver_signup.run_driver_signup()
 
-special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
+    special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
-frame = customtkinter.CTkFrame(master=root)
-frame.pack(fill="both", expand=True)
+    frame = customtkinter.CTkFrame(master=root)
+    frame.pack(fill="both", expand=True)
 
-label = customtkinter.CTkLabel(root, text
+    label = customtkinter.CTkLabel(root, text="Login System for Drivers", font=special_font)
+    label.pack(pady=0, padx=0)
+    label.place(relx=0.5, rely=0.25, anchor="center")
+
+    entry1 = customtkinter.CTkEntry(master=frame, justify='center', placeholder_text="MMU Id")
+    entry1.pack(pady=12, padx=10)
+    entry1.place(relx=0.5, rely=0.38, anchor='center')
+
+    entry2 = customtkinter.CTkEntry(master=frame, justify='center', placeholder_text="Password", show="*") 
+    entry2.place(relx=0.5, rely=0.5, anchor="center")
+
+    button = customtkinter.CTkButton(master=frame, fg_color="red", text="Login", command=login)
+    button.place(relx=0.5, rely=0.63, anchor="center")
+
+    checkbox = customtkinter.CTkCheckBox(master=frame, text="Remember Me")
+    checkbox.place(relx=0.5, rely=0.75, anchor="center")
+
+    button1 = customtkinter.CTkButton(master=frame, text="Click here to sign up.", command=callback_dp2) 
+    button1.place(relx=0.5, rely= 0.87, anchor="center")
+
+    label_message = customtkinter.CTkLabel(frame, text="")
+    label_message.pack(pady=20)
+    label_message.place(relx=0.5, rely=0.95, anchor="center")
+    
+    root.mainloop()
+
+if __name__ == "_main_":
+    run_driver_page()
