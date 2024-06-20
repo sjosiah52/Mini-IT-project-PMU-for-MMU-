@@ -29,10 +29,10 @@ def run_admin_page():
 
     ph = PasswordHasher()
     allowed_users = {
-        "admin1": ph.hash("password1"),
-        "friend1": ph.hash("password2"),
-        "friend2": ph.hash("password3"),
-        "friend3": ph.hash("password4")
+        "samthedon": ph.hash("test"),
+        "Liveradmin": ph.hash("admin2109"),
+        "aziffadmin": ph.hash("admin1602"),
+        "lecturersuhaini": ph.hash("mmuisyou")
     }
 
     login_attempts = {}
