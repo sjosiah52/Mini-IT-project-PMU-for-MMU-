@@ -23,10 +23,6 @@ root = ctk.CTk()
 root.title("Full Screen 16:9 Window")
 root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 
-screenWidth=root.winfo_screenwidth() #utk dptkan width window
-screenHeight=root.winfo_screenheight()#dptkan height
-
-
 fullscreen(root)
 
 def callback_ap():
