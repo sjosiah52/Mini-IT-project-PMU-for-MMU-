@@ -4,7 +4,7 @@ import threading
 import subprocess
 
 customtkinter.set_appearance_mode("light")
-customtkinter.set_appearance_mode("dark")
+#customtkinter.set_appearance_mode("dark")
 
 def run_user_page2():
     def fullscreen(window):
@@ -70,13 +70,17 @@ def run_user_page2():
     frame = customtkinter.CTkFrame(master=root)
     frame.pack(fill="both", expand=True)
 
-    label = customtkinter.CTkLabel(frame, text="Welcome to Pick Me Up for MMU!", font=special_font)
-    label.pack(pady=20, padx=20)
-    label.place(relx=0.5, rely=0.15, anchor="center")
+    header_frame = customtkinter.CTkFrame(frame, corner_radius=0, fg_color="#ff0000")
+    header_frame.pack(fill="x")
+
+
+    label = customtkinter.CTkLabel(header_frame, text="Welcome to Pick Me Up for MMU!", font=special_font, text_color="#fcfbfa")
+    label.pack(pady=10, padx=10)
+    label.place(relx=0.5, rely=0.4, anchor="center")
 
     label1 = customtkinter.CTkLabel(frame, text="Please sign up for our app using your MMU Id, Name, and Phone Number. Next time you can just login using your ID and Password.", font=normal_font)
     label1.pack(pady=20, padx=20)
-    label1.place(relx=0.5, rely=0.25, anchor="center")
+    label1.place(relx=0.5, rely=0.31, anchor="center")
 
     entry_id = customtkinter.CTkEntry(frame, placeholder_text="MMU ID")
     entry_id.pack(pady=10)
@@ -103,7 +107,7 @@ def run_user_page2():
     label_message.place(relx=0.9, rely=0.85, anchor="center")
 
     back_button = customtkinter.CTkButton(master=frame, text="Back", command=back_to_main)
-    back_button.place(relx=0.5, rely=0.9, anchor="center")
+    back_button.place(relx=0.075, rely=0.95, anchor="center")
 
     root.mainloop()
 
