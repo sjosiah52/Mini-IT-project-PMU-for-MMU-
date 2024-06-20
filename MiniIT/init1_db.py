@@ -21,6 +21,6 @@ def initialize_database():
         cursor.executescript(INITIALIZE_SQL)
         conn.commit()
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     initialize_database()
     print(f'Database {DATABASE} initialized successfully.')
