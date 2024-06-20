@@ -13,7 +13,6 @@ class RouteMapApp(ctk.CTk):
 
         self.title("Pick-Up For MMU")
         self.geometry(f"{width}x{height}")
-
         # Header
         header_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="#ff0000")
         header_frame.pack(fill="x")
@@ -71,12 +70,18 @@ class RouteMapApp(ctk.CTk):
 
         self.price_entry = ctk.CTkEntry(form_frame, width=300)
         self.price_entry.pack(pady=5)
+        
+        #Phone number
+        phone_label = ctk.CTkLabel(form_frame, text="Phone Number:")
+        phone_label.pack(anchor="w", pady=5)
 
+        self.phone_entry = ctk.CTkEntry(form_frame, width=300)
+        self.phone_entry.pack(pady=5)
+        
         # Book Now Button
         book_button = ctk.CTkButton(form_frame, text="Check Price", command=self.book_now, fg_color="#2600ff", hover_color="#555555")
         book_button.pack(pady=20)
 
-        # Confirm Ride Button
         confirm_button = ctk.CTkButton(form_frame, text="Confirm Ride", command=self.confirm_ride, fg_color="#2600ff", hover_color="#555555")
         confirm_button.pack(pady=10)
 
@@ -117,6 +122,30 @@ class RouteMapApp(ctk.CTk):
 
         # Bind Escape key to toggle fullscreen
         self.bind("<Escape>", lambda e: self.toggle_fullscreen())
+
+    def confirm_ride(self):
+        pickup = self.pickup_entry.get()
+        destination = self.destination_entry.get()
+        price = self.price_entry.get()
+        name = self.user_entry.get()
+        phone = self.phone_entry.get()
+
+        data = {
+            "pickup": pickup,
+            "destination": destination,
+            "price": price,
+            "name": name,
+            "phone": phone
+        }
+
+        try:
+            response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
+            if response.status_code == 200:
+                print("Ride confirmed and data saved to the database.")
+            else:
+                print("Failed to save data to the database.")
+        except Exception as e:
+            print(f"Error confirming ride: {e}")
 
     def nav_command(self, text):
         print(f"Navigation button '{text}' clicked")
@@ -243,12 +272,14 @@ class RouteMapApp(ctk.CTk):
         destination = self.destination_entry.get()
         price = self.price_entry.get()
         name = self.user_entry.get()
+        phone = self.user_entry.get()
 
         data = {
             "pickup": pickup,
             "destination": destination,
             "price": price,
-            "name": name
+            "name": name,
+            "phone": phone
         }
 
         try:
