@@ -150,6 +150,31 @@ def get_accepted_ride(ride_id):
         return jsonify({"ride_details": ride_details}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/ride_details/<int:ride_id>', methods=['GET'])
+def get_ride_details(ride_id):
+    try:
+        conn = sqlite3.connect('rides.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM rides WHERE id=?", (ride_id,))
+        ride = c.fetchone()
+        conn.close()
 
+        if not ride:
+            return jsonify({"error": "Ride not found"}), 404
+
+        ride_details = {
+            "id": ride[0],
+            "pickup": ride[1],
+            "destination": ride[2],
+            "price": ride[3],
+            "driver_name": ride[6],
+            "driver_phone": ride[7]
+        }
+
+        return jsonify({"ride_details": ride_details}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5003)
