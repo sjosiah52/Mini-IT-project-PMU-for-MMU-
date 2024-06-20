@@ -272,7 +272,7 @@ class RouteMapApp(ctk.CTk):
         destination = self.destination_entry.get()
         price = self.price_entry.get()
         name = self.user_entry.get()
-        phone = self.user_entry.get()
+        phone = self.phone_entry.get()
 
         data = {
             "pickup": pickup,
@@ -281,15 +281,33 @@ class RouteMapApp(ctk.CTk):
             "name": name,
             "phone": phone
         }
-
         try:
-            response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
-            if response.status_code == 200:
-                print("Ride confirmed and data saved to the database.")
-            else:
-                print("Failed to save data to the database.")
-        except Exception as e:
-            print(f"Error confirming ride: {e}")
+                response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
+                response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+                print("Ride booked successfully!")
+
+                # Get the ride ID from the response
+                ride_id = response.json().get("ride_id")
+
+                # Create a label to display the ride ID
+                self.ride_id_label = tk.Label(self.route_info_frame, text=f"Ride ID: {ride_id}")
+                self.ride_id_label.pack()
+
+        except requests.exceptions.HTTPError as errh:
+            print ("HTTP Error:", errh)
+        except requests.exceptions.ConnectionError as errc:
+            print ("Error Connecting:", errc)
+        except requests.exceptions.Timeout as errt:
+            print ("Timeout Error:", errt)
+        except requests.exceptions.RequestException as err:
+            print ("Something went wrong", err)
+
+        # Clear the form fields
+        self.pickup_entry.delete(0, tk.END)
+        self.destination_entry.delete(0, tk.END)
+        self.price_entry.delete(0, tk.END)
+        self.user_entry.delete(0, tk.END)
+        self.phone_entry.delete(0, tk.END)
 
     def fullscreen(self):
         screen_width = self.winfo_screenwidth()
