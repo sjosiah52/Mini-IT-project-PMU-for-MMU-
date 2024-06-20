@@ -1,32 +1,65 @@
 import customtkinter
-import tkinter
+import admin_page2
+from tkinter import messagebox
+from argon2 import PasswordHasher, exceptions
+
+def fullscreen(window):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    if screen_width / screen_height > 16 / 9:
+        height = screen_height
+        width = int(height * 16 / 9)
+    else:
+        width = screen_width
+        height = int(width * 9 / 16)
+
+    window.geometry(f"{width}x{height}")
+    window.attributes('-fullscreen', True)
 
 def run_admin_page():
     customtkinter.set_appearance_mode("light")
     customtkinter.set_default_color_theme("dark-blue")
-    def fullscreen(window):
-       screen_width = window.winfo_screenwidth()
-       screen_height = window.winfo_screenheight()
-
-       if screen_width / screen_height > 16 / 9:
-           height = screen_height
-           width = int(height * 16 / 9)
-       else:
-           width = screen_width
-           height = int(width * 9 / 16)
-
-       window.geometry(f"{width}x{height}")
-       window.attributes('-fullscreen', True)
 
     root = customtkinter.CTk()
-    root = tkinter.Tk()
     root.title("Full Screen 16:9 Window")
     root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 
     fullscreen(root)
 
+    ph = PasswordHasher()
+    allowed_users = {
+        "admin1": ph.hash("password1"),
+        "friend1": ph.hash("password2"),
+        "friend2": ph.hash("password3"),
+        "friend3": ph.hash("password4")
+    }
+
+    login_attempts = {}
+
+    def callback_ap2():
+        admin_page2.open_admin_page()
+
     def login():
-        print("test")
+        username = entry1.get()
+        password = entry2.get()
+
+        if username in allowed_users:
+            try:
+                ph.verify(allowed_users[username], password)
+                callback_ap2()
+                return
+            except exceptions.VerifyMismatchError:
+                pass
+
+        if username not in login_attempts:
+            login_attempts[username] = 0
+        login_attempts[username] += 1
+
+        if login_attempts[username] > 3:
+            messagebox.showerror("Error", "Too many failed attempts. Try again later.")
+        else:
+            messagebox.showerror("Error", "Invalid username or password")
 
     special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
@@ -52,5 +85,4 @@ def run_admin_page():
 
     root.mainloop()
 
-if __name__ == "__main__":
-    run_admin_page()
+run_admin_page()
