@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS ride (
     destination TEXT NOT NULL,
     price REAL NOT NULL,
     user_name TEXT NOT NULL
+    phone_number INTEGER NOT NULL
 );  
 '''
 
@@ -18,6 +19,7 @@ def initialize_database():
             cursor = conn.cursor()
             cursor.executescript(INITIALIZE_SQL)
             conn.commit()
+        
         print("Database initialized successfully.")
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
