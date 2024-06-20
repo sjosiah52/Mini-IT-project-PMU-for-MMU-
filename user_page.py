@@ -70,9 +70,12 @@ def run_user_page():
     frame = customtkinter.CTkFrame(master=root)
     frame.pack(fill="both", expand=True)
 
-    label = customtkinter.CTkLabel(root, text="Login System for Users", font=special_font)
+    header_frame = customtkinter.CTkFrame(frame, corner_radius=0, fg_color="#ff0000")
+    header_frame.pack(fill="x")
+
+    label = customtkinter.CTkLabel(root, text="Login System for Users", font=special_font,bg_color="#ff0000",text_color="#fffefc")
     label.pack(pady=0, padx=0)
-    label.place(relx=0.5, rely=0.25, anchor="center")
+    label.place(relx=0.5, rely=0.15, anchor="center")
 
     entry1 = customtkinter.CTkEntry(master=frame, justify='center', placeholder_text="MMU Id")
     entry1.pack(pady=12, padx=10)
@@ -85,7 +88,7 @@ def run_user_page():
     button.place(relx=0.5, rely=0.63, anchor="center")
 
     back_button = customtkinter.CTkButton(master=frame, text="Back", command=back_to_main)
-    back_button.place(relx=0.5, rely=0.7, anchor="center")
+    back_button.place(relx=0.075, rely=0.95, anchor="center")
 
     button1 = customtkinter.CTkButton(master=frame, text="Click here to sign up.", command=callback_up2)
     button1.place(relx=0.5, rely= 0.87, anchor="center")
