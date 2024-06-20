@@ -30,12 +30,15 @@ screenHeight=root.winfo_screenheight()#dptkan height
 fullscreen(root)
 
 def callback_ap():
+    root.withdraw()
     subprocess.Popen(["python", "admin_page.py"])
 
 def callback_up():
+    root.withdraw()
     subprocess.Popen(["python", "user_page.py"])
 
 def callback_dp():
+    root.withdraw()
     subprocess.Popen(["python", "driver_page.py"])
 
 def create_ui(root):
