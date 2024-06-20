@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Driver</title>
+    <title>Admin - Delete User</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,17 +21,17 @@
     </style>
 </head>
 <body>
-    <h1>Delete Driver</h1>
-    <form action="/admin/delete_drivers" method="POST">
+    <h1>Admin - Delete User</h1>
+    <form action="/admin/delete_drivers" method="post">
         <label for="username">Admin Username:</label>
         <input type="text" id="username" name="username" required>
         
         <label for="password">Admin Password:</label>
         <input type="password" id="password" name="password" required>
         
-        <label for="mmu_id">MMU ID of User to Delete:</label>
-        <input type="text" id="mmu_id" name="mmu_id" required>
-
+        <label for="mmu_id">MMU ID of Driver to Delete:</label>
+        <input type="text" id="mmu_id" name="mmu_id" required>
+        
         <button type="submit">Delete Driver</button>
     </form>
     <p id="result"></p>
