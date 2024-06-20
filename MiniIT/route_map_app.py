@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkintermapview import TkinterMapView
 import requests
 import math
+from user_ride_confirmation import RideDetailsApp
 import tkinter as tk
 
 # Your OpenCage API key
@@ -282,25 +283,61 @@ class RouteMapApp(ctk.CTk):
             "phone": phone
         }
         try:
-                response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
-                response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
-                print("Ride booked successfully!")
+            response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
+            response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+            print("Ride booked successfully!")
 
-                # Get the ride ID from the response
-                ride_id = response.json().get("ride_id")
+            # Get the ride ID from the response
+            ride_id = response.json().get("ride_id")
 
-                # Create a label to display the ride ID
-                self.ride_id_label = tk.Label(self.route_info_frame, text=f"Ride ID: {ride_id}")
-                self.ride_id_label.pack()
+            # Create a new window to display ride details
+            ride_details_window = tk.Toplevel(self)
+            ride_details_window.title("Ride Details")
+
+            # Create a label to display ride details
+            ride_details_label = tk.Label(ride_details_window, text="", font=("Helvetica", 12))
+            ride_details_label.pack(pady=10)
+
+            # Fetch ride details from server
+            response = requests.get(f"http://127.0.0.1:5003/ride_details/{ride_id}")
+            if response.status_code == 200:
+                ride_details = response.json()["ride_details"]
+                ride_details_text = f"Ride ID: {ride_details['id']}\nPickup: {ride_details['pickup']}\nDestination: {ride_details['destination']}\nPrice: {ride_details['price']}"
+
+                # Add a label to display driver information
+                driver_info_label = tk.Label(ride_details_window, text="", font=("Helvetica", 12))
+                driver_info_label.pack(pady=10)
+
+                # Update the ride status and fetch driver information
+                def update_ride_status():
+                    response = requests.get(f"http://127.0.0.1:5003/accepted_ride/{ride_id}")
+                    if response.status_code == 200:
+                        ride_details = response.json()
+                        if ride_details.get("driver_name") and ride_details.get("driver_phone"):
+                            driver_info_text = f"Driver Name: {ride_details['driver_name']}\nPhone: {ride_details['driver_phone']}"
+                            driver_info_label.config(text=driver_info_text)
+                        else:
+                            driver_info_label.config(text="Waiting for driver to accept...")
+                    else:
+                        print(f"Failed to fetch ride status: {response.json().get('error')}")
+                        driver_info_label.config(text="Failed to fetch ride status", fg="red")
+                    ride_details_window.after(5000, update_ride_status)  # Update every 5 seconds
+
+                update_ride_status()  # Initial update
+
+                ride_details_label.configure(text=ride_details_text)
+            else:
+                print(f"Failed to fetch ride details: {response.json().get('error')}")
+                ride_details_label.configure(text="Failed to fetch ride details", fg="red")
 
         except requests.exceptions.HTTPError as errh:
-            print ("HTTP Error:", errh)
+            print("HTTP Error:", errh)
         except requests.exceptions.ConnectionError as errc:
-            print ("Error Connecting:", errc)
+            print("Error Connecting:", errc)
         except requests.exceptions.Timeout as errt:
-            print ("Timeout Error:", errt)
+            print("Timeout Error:", errt)
         except requests.exceptions.RequestException as err:
-            print ("Something went wrong", err)
+            print("Something went wrong", err)
 
         # Clear the form fields
         self.pickup_entry.delete(0, tk.END)
@@ -308,6 +345,59 @@ class RouteMapApp(ctk.CTk):
         self.price_entry.delete(0, tk.END)
         self.user_entry.delete(0, tk.END)
         self.phone_entry.delete(0, tk.END)
+
+        def update_ride_status():
+            response = requests.get(f"http://127.0.0.1:5003/accepted_ride/{ride_id}")
+            if response.status_code == 200:
+                ride_details = response.json()
+                if ride_details.get("driver_name") and ride_details.get("driver_phone"):
+                    driver_info_text = f"Driver Name: {ride_details['driver_name']}\nPhone: {ride_details['driver_phone']}"
+                    driver_info_label.config(text=driver_info_text)
+                else:
+                    driver_info_label.config(text="Waiting for driver to accept...")
+            else:
+                print(f"Failed to fetch ride status: {response.json().get('error')}")
+                driver_info_label.config(text="Failed to fetch ride status", fg="red")
+            ride_details_window.after(5000, update_ride_status)  # Update every 5 seconds
+
+        update_ride_status()
+    
+    def on_confirm_ride_button_click(self):
+        pickup = self.pickup_entry.get()
+        destination = self.destination_entry.get()
+        price = self.price_entry.get()
+
+        if not pickup or not destination or not price:
+            self.status_label.configure(text="Please fill in all fields", fg="red")
+            return
+
+        try:
+            price = float(price)
+            if price <= 0:
+                self.status_label.configure(text="Price must be greater than 0", fg="red")
+                return
+        except ValueError:
+            self.status_label.configure(text="Invalid price", fg="red")
+            return
+
+        try:
+            response = requests.post("http://127.0.0.1:5003/create_ride", json={"pickup": pickup, "destination": destination, "price": price})
+            if response.status_code == 200:
+                ride_id = response.json()["ride_id"]
+                self.status_label.configure(text="Ride created successfully", fg="green")
+
+                # Create an instance of the RideDetailsApp
+                ride_details_app = RideDetailsApp(self,ride_id)
+                ride_details_app.mainloop()
+
+                # Clear the input fields
+                self.pickup_entry.delete(0, tk.END)
+                self.destination_entry.delete(0, tk.END)
+                self.price_entry.delete(0, tk.END)
+            else:
+                self.status_label.configure(text="Failed to create ride", fg="red")
+        except Exception as e:
+            self.status_label.configure(text=f"Error creating ride: {e}", fg="red")
 
     def fullscreen(self):
         screen_width = self.winfo_screenwidth()
