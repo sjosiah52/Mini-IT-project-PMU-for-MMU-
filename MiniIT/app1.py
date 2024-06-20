@@ -1,9 +1,9 @@
-import requests
-from flask import Flask, request, jsonify, Response, render_template
 import sqlite3
 import hashlib
+import requests
+from flask import Flask, request, jsonify, Response, render_template
 
-app = Flask(__name__)
+app1 = Flask(__name__)
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -15,12 +15,12 @@ def check_admin_auth(username, password):
     return username == ADMIN_USERNAME and hash_password(password) == ADMIN_PASSWORD
 
 def verify_email(email):
-    API_KEY = '1852a73007a78997b959aa5191853dcbf45a1a9c'  # Replace with your Hunter API key
+    API_KEY = '1852a73007a78997b959aa5191853dcbf45a1a9c'
     response = requests.get(f'https://api.hunter.io/v2/email-verifier?email={email}&api_key={API_KEY}')
     data = response.json()
     return data['data']['status'] == 'valid'
 
-@app.route("/driver_signup", methods=["POST"])
+@app1.route("/driver_signup", methods=["POST"])
 def driver_signup():
     data = request.json
     mmu_id = data.get("mmu_id")
@@ -32,19 +32,17 @@ def driver_signup():
     if not verify_email(email):
         return jsonify({"message": "Invalid MMU ID"}), 400
 
-    try:
-        with sqlite3.connect("drivers.db") as conn:
-            cursor = conn.cursor()
+    with sqlite3.connect("drivers.db") as conn:
+        cursor = conn.cursor()
+        try:
             cursor.execute("INSERT INTO drivers (mmu_id, ic_number, vehicle_registration_number, password) VALUES (?, ?, ?, ?)",
                            (mmu_id, ic_number, vehicle_registration_number, password))
             conn.commit()
             return jsonify({"message": "Driver sign-up successful"}), 201
-    except sqlite3.IntegrityError:
-        return jsonify({"message": "Driver already exists"}), 409
-    except Exception as e:
-        return jsonify({"message": f"Sign-up failed: {str(e)}"}), 500
-
-@app.route("/driver_login", methods=["POST"])
+        except sqlite3.IntegrityError:
+            return jsonify({"message": "Driver already exists"}), 409
+    
+@app1.route("/driver_login", methods=["POST"])
 def driver_login():
     data = request.json
     mmu_id = data.get("mmu_id")
@@ -59,7 +57,7 @@ def driver_login():
         else:
             return jsonify({"message": "Invalid credentials"}), 401
 
-@app.route("/admin/drivers", methods=["GET"])
+@app1.route("/admin/drivers", methods=["GET"])
 def get_drivers():
     auth = request.authorization
     if not auth or not check_admin_auth(auth.username, auth.password):
@@ -74,7 +72,7 @@ def get_drivers():
         driver_list = [{"mmu_id": driver[0], "ic_number": driver[1], "vehicle_registration_number": driver[2]} for driver in drivers]
         return jsonify(driver_list)
 
-@app.route("/admin/delete_drivers", methods=["POST"])
+@app1.route("/admin/delete_drivers", methods=["POST"])
 def delete_drivers():
     auth = request.authorization
     if not auth or not check_admin_auth(auth.username, auth.password):
@@ -94,9 +92,9 @@ def delete_drivers():
         else:
             return jsonify({"message": "Driver deleted successfully"}), 200
 
-@app.route("/admin/delete_form")
+@app1.route("/admin/delete_form")
 def delete_form():
     return render_template('delete_form2.html')
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app1.run(debug=True, port=5002)
