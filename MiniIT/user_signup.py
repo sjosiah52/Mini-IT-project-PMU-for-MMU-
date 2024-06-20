@@ -80,7 +80,7 @@ def run_user_page2():
     entry_name.pack(pady=10)
     entry_name.place(relx=0.5, rely=0.45, anchor="center")
 
-    entry_phone = customtkinter.CTkEntry(frame, placeholder_text="Phone Number")
+    entry_phone = customtkinter.CTkEntry(frame, placeholder_text="Phone Number(digits only)")
     entry_phone.pack(pady=10)
     entry_phone.place(relx=0.5, rely=0.55, anchor="center")
 
