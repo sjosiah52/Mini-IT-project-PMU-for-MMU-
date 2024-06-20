@@ -68,7 +68,7 @@ def run_user_page2():
     label.pack(pady=20, padx=20)
     label.place(relx=0.5, rely=0.15, anchor="center")
 
-    label1 = customtkinter.CTkLabel(frame, text="Please sign up for our app using your MMU Id, Name, and Phone Number. Next time you can just login using your ID and Password." font=normal_font)
+    label1 = customtkinter.CTkLabel(frame, text="Please sign up for our app using your MMU Id, Name, and Phone Number. Next time you can just login using your ID and Password.", font=normal_font)
     label1.pack(pady=20, padx=20)
     label1.place(relx=0.5, rely=0.25, anchor="center")
 
