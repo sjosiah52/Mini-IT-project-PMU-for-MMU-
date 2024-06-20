@@ -48,7 +48,7 @@ def login():
                   label_message.configure(text="Login succesful", text_color="green")
                   time.sleep(1) # Ensure there's a slight delay before closing
                   root.withdraw() # Hide the login window
-                  subprocess.Popen(["python", "driver_accepting_page.py"])
+                  print("user interface for accepting rides")
               elif response.status_code == 401:
                   label_message.configure(text="Invalid credentials", text_color="red")
               else:
