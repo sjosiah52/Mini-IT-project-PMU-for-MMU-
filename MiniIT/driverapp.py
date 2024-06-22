@@ -87,32 +87,29 @@ class DriverPageApp(tk.Tk):
 
     def accept_ride(self, ride_id, driver_name, driver_phone):
         try:
-            response = requests.post("http://127.0.0.1:5003/accept_ride", json={"ride_id": ride_id, "driver_name": driver_name, "driver_phone": driver_phone})
+            response = requests.post("http://127.0.0.1:5003/accept_ride", json={
+                "ride_id": ride_id,
+                "driver_name": driver_name,
+                "driver_phone": driver_phone
+            })
+            
             if response.status_code == 200:
-                print("Ride accepted and removed from the database.")
+                print("Ride accepted and updated in the database.")
                 self.status_label.configure(text="Ride accepted", fg="green")
                 self.fetch_ride_requests()  # Refresh the ride list
 
-                # Fetch ride details
-                response = requests.get(f"http://127.0.0.1:5003/accepted_ride/{ride_id}")
-                if response.status_code == 200:
-                    ride_details = response.json()["ride_details"]
-                    self.display_ride_details(ride_details)
-                else:
-                    print(f"Failed to fetch ride details: {response.json().get('error')}")
-                    self.status_label.configure(text="Failed to fetch ride details", fg="red")
+                # Notify user and proceed to confirmation
+                #self.notify_user_and_confirm(ride_id, driver_name, driver_phone)
+
             else:
-                print(f"Failed to accept ride: {response.json().get('error')}")
-                self.status_label.configure(text="Failed to accept ride", fg="red")
+                error_message = response.json().get("error")
+                print(f"Failed to accept ride: {error_message}")
+                self.status_label.configure(text=f"Failed to accept ride: {error_message}", fg="red")
+
         except Exception as e:
             print(f"Error accepting ride: {e}")
             self.status_label.configure(text=f"Error accepting ride: {e}", fg="red")
-
-    def display_ride_details(self, ride_details):
-        # Create a new label to display ride details
-        ride_details_label = tk.Label(self, text=f"Ride Details:\nID: {ride_details['id']}\nPickup: {ride_details['pickup']}\nDestination: {ride_details['destination']}\nPrice: {ride_details['price']}\nUser Name: {ride_details['user_name']}\nUser Phone: {ride_details['user_phone']}", font=("Helvetica", 12))
-        ride_details_label.pack(pady=10)
-
+            
 if __name__ == "__main__":
     app = DriverPageApp()
     app.mainloop()
