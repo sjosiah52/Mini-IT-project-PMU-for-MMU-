@@ -2,6 +2,7 @@ import requests
 from flask import Flask, request, jsonify, Response, render_template
 import sqlite3
 import hashlib
+from init_db import initialize_database
 
 app = Flask(__name__)
 
@@ -20,6 +21,7 @@ def verify_email(email):
     data = response.json()
     return data['data']['status'] == 'valid'
 
+initialize_database()
 
 @app.route("/signup", methods=["POST"])
 def signup():
