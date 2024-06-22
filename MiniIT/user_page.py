@@ -57,13 +57,15 @@ def run_user_page():
 
         threading.Thread(target=send_request).start()
 
-    def callback_up2():
-        user_signup.run_user_page2()
-        
     def back_to_main():
             root.withdraw
-            subprocess.Popen(["python", "First_page.py"])
-         
+            script_path = os.path.join(os.path.dirname(__file__), "First_page.py")
+            subprocess.Popen(["python", script_path])
+
+    def callback_up2():
+        root.withdraw
+        script_path2 = os.path.join(os.path.dirname(__file__), "user_signup.py")
+        subprocess.Popen(["python", script_path2])
 
     special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
