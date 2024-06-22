@@ -1,0 +1,9 @@
+Welcome to our app. This app could help find you a ride for you to get around campus or get around the whole Cyberjaya for that matter. 
+Before using our app, you need to activate a virtual environment first. After that you have to download several libraries.
+To activate a virtual enviroment, press Ctrl+Shift+P first, and then press Python:Create Environment. After that press venv.
+One more step left, please download the following libraries before using our app.
+
+[customtkinter, flask, requests, tkintermapview, os]
+
+Please activate your virtual environment first before using 'pip install' in your command prompt to download these libraries. 
+Thank you and have a great time using our app.
