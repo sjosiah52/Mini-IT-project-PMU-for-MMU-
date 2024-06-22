@@ -1,6 +1,8 @@
 import customtkinter
 import requests
 import threading
+import subprocess
+import os
 
 customtkinter.set_appearance_mode("light")
 customtkinter.set_default_color_theme("dark-blue")
@@ -17,13 +19,13 @@ def run_driver_signup():
                 width = screen_width
                 height = int(width *9/16)
 
-             window.geometry(f"{width}x{height}")
-             window.attributes('-fullscreen', True)
+            window.geometry(f"{width}x{height}")
+            window.attributes('-fullscreen', True)
         
     root = customtkinter.CTk()
     root.geometry("500x500")
     root.title("Full Screen 16:9 Window")
-    root.bind("<Escape>" lambda e: root.attributes('-fullscreen', False))
+    root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 
     fullscreen(root)
     
@@ -31,7 +33,7 @@ def run_driver_signup():
         mmuid = entry_mmuid.get()
         icnumber = entry_icnumber.get()
         vehicleregistrationnumber = entry_vehicle_registration_number.get()
-        password = entry_passowrd.get()
+        password = entry_password.get()
 
         email = f"{mmuid}@student.mmu.edu.my"
         print(f"Validating email: {email}")
@@ -44,22 +46,27 @@ def run_driver_signup():
             "password": password
             }
 
-         try:
-             response = requests.post("http://127.0.0.1:5001/driver_signup", json=data)
-             if reponse.status_code == 201:
-                 label_message.configure(text="Sign-up sucessful", text_color="green")
-             elif response.status_code == 409:
-                 label_message.configure(text= "User already exists", text_color="red")
-             elif response.status_code == 400:  
-                 label.message.configure(text="Invalid MMU ID", text_color="red")
-             else:
-                 label_message.configure(text="Sign-up failed", text_color="red")
-        except requests.exceptions.RequestExcept as e:
-             label_message.configure(text=f"An error occured: {str(e)}", text_color="red")
+            try:
+                response = requests.post("http://127.0.0.1:5002/driver_signup", json=data)
+                if response.status_code == 201:
+                    label_message.configure(text="Sign-up sucessful", text_color="green")
+                elif response.status_code == 409:
+                    label_message.configure(text= "User already exists", text_color="red")
+                elif response.status_code == 400:  
+                    label_message.configure(text="Invalid MMU ID", text_color="red")
+                else:
+                    label_message.configure(text="Sign-up failed", text_color="red")
+            except Exception as e:
+                label_message.configure(text=f"An error occured: {str(e)}", text_color="red")
 
-             threading.Thread(target=validate_and_signup).start()
-            
-    special_font = customtkinter.CTkfont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
+        threading.Thread(target=validate_and_sign_up).start()
+
+    def back_to_main():
+            root.withdraw
+            script_path = os.path.join(os.path.dirname(__file__), "driver_page.py")
+            subprocess.Popen(["python", script_path])
+       
+    special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
     frame = customtkinter.CTkFrame(master=root)
     frame.pack(fill="both", expand=True)
@@ -86,6 +93,9 @@ def run_driver_signup():
 
     button = customtkinter.CTkButton(master=frame, fg_color="green", text="Sign Up", command=signup)
     button.place(relx=0.5, rely=0.6, anchor="center")
+
+    back_button = customtkinter.CTkButton(master=frame, text="Back", command=back_to_main)
+    back_button.place(relx=0.075, rely=0.95, anchor="center")
 
     label_message = customtkinter.CTkLabel(master=frame, text="")
     label_message.place(relx=0.5, rely=0.8, anchor="center")
