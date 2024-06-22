@@ -1,9 +1,10 @@
 import customtkinter as ctk
 from tkintermapview import TkinterMapView
-import requests
+import requests, json
 import math
-from user_ride_confirmation import RideDetailsApp
+import user_ride_confirmation
 import tkinter as tk
+import sqlite3
 
 # Your OpenCage API key
 OPENCAGE_API_KEY = "8ff4cd18db4e436c90a5fc5e06574570"
@@ -11,6 +12,9 @@ OPENCAGE_API_KEY = "8ff4cd18db4e436c90a5fc5e06574570"
 class RouteMapApp(ctk.CTk):
     def __init__(self, width=1200, height=800):
         super().__init__()
+        
+        def callback_urp():
+            user_ride_confirmation.checkridedetails()   
 
         self.title("Pick-Up For MMU")
         self.geometry(f"{width}x{height}")
@@ -29,10 +33,14 @@ class RouteMapApp(ctk.CTk):
         for btn_text in nav_buttons:
             if btn_text == "Contact":
                 btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=self.show_contact_info, fg_color="#ff0000", hover_color="#555555")
+            elif btn_text == "About":
+                btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=self.show_about_info, fg_color="#ff0000", hover_color="#555555")
+            elif btn_text == "Services":
+                btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=self.show_services_info, fg_color="#ff0000", hover_color="#555555")
             else:
-                btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=lambda text=btn_text: self.nav_command(text), fg_color="#ff0000", hover_color="#555555")
+                btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=self.show_home_info, fg_color="#ff0000", hover_color="#555555")
             btn.pack(side="left", padx=5, pady=5)
-
+            
         # Main Content
         main_frame = ctk.CTkFrame(self)
         main_frame.pack(padx=20, pady=20, fill="both", expand=True)
@@ -59,7 +67,7 @@ class RouteMapApp(ctk.CTk):
         self.destination_entry.pack(pady=5)
 
         # User Name
-        user_label = ctk.CTkLabel(form_frame, text="User Name:")
+        user_label = ctk.CTkLabel(form_frame, text="Name(Please use this name to check you ride details later):  ")
         user_label.pack(anchor="w", pady=5)
 
         self.user_entry = ctk.CTkEntry(form_frame, width=300)
@@ -71,20 +79,33 @@ class RouteMapApp(ctk.CTk):
 
         self.price_entry = ctk.CTkEntry(form_frame, width=300)
         self.price_entry.pack(pady=5)
-        
-        #Phone number
+
+        # Phone number
         phone_label = ctk.CTkLabel(form_frame, text="Phone Number:")
         phone_label.pack(anchor="w", pady=5)
 
         self.phone_entry = ctk.CTkEntry(form_frame, width=300)
         self.phone_entry.pack(pady=5)
-        
-        # Book Now Button
-        book_button = ctk.CTkButton(form_frame, text="Check Price", command=self.book_now, fg_color="#2600ff", hover_color="#555555")
-        book_button.pack(pady=20)
 
-        confirm_button = ctk.CTkButton(form_frame, text="Confirm Ride", command=self.confirm_ride, fg_color="#2600ff", hover_color="#555555")
-        confirm_button.pack(pady=10)
+        # Button Frame for Check Price and Confirm Ride buttons
+        button_frame = ctk.CTkFrame(form_frame)
+        button_frame.pack(pady=20)
+
+        # Check Price Button
+        book_button = ctk.CTkButton(button_frame, text="Check Price", command=self.book_now, fg_color="#2600ff", hover_color="#555555")
+        book_button.pack(side="left", padx=10)
+
+        # Confirm Ride Button
+        confirm_button = ctk.CTkButton(button_frame, text="Confirm Ride", command=self.confirm_ride, fg_color="#2600ff", hover_color="#555555")
+        confirm_button.pack(side="left", padx=10)
+
+        # Frame for the new button
+        button_center_frame = ctk.CTkFrame(form_frame)
+        button_center_frame.pack(pady=3)
+
+        # New Button (example)
+        new_button = ctk.CTkButton(button_center_frame, text="Check Ride Details", command=callback_urp, fg_color="#2600ff", hover_color="#555555")
+        new_button.pack()
 
         # Route Info
         self.route_info_frame = ctk.CTkFrame(form_frame)
@@ -95,6 +116,9 @@ class RouteMapApp(ctk.CTk):
 
         self.time_info_label = ctk.CTkLabel(self.route_info_frame, text="", font=ctk.CTkFont(size=14))
         self.time_info_label.pack()
+
+        self.status_label = ctk.CTkLabel(self, text="", font=ctk.CTkFont(size=12))
+        self.status_label.pack(pady=10)
 
         # Map Frame
         map_frame = ctk.CTkFrame(main_frame)
@@ -123,14 +147,8 @@ class RouteMapApp(ctk.CTk):
 
         # Bind Escape key to toggle fullscreen
         self.bind("<Escape>", lambda e: self.toggle_fullscreen())
-
-    def confirm_ride(self):
-        pickup = self.pickup_entry.get()
-        destination = self.destination_entry.get()
-        price = self.price_entry.get()
-        name = self.user_entry.get()
-        phone = self.phone_entry.get()
-
+        
+    def confirm_ride(pickup, destination, price, name, phone):
         data = {
             "pickup": pickup,
             "destination": destination,
@@ -141,22 +159,29 @@ class RouteMapApp(ctk.CTk):
 
         try:
             response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
-            if response.status_code == 200:
-                print("Ride confirmed and data saved to the database.")
-            else:
-                print("Failed to save data to the database.")
-        except Exception as e:
-            print(f"Error confirming ride: {e}")
+            response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+            print("Ride booked successfully!")
 
+            # Create a new window for ride confirmation
+            ride_confirmation_window = tk.Toplevel()
+            ride_confirmation_window.title("Ride Confirmation")
+
+            # Label to display congratulatory message
+            congrats_label = tk.Label(ride_confirmation_window, text="Congratulations! Your ride has been confirmed.")
+            congrats_label.pack(pady=10)
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
+    
     def nav_command(self, text):
         print(f"Navigation button '{text}' clicked")
 
     def show_contact_info(self):
         contact_info = (
             "Contact Us:\n\n"
-            "Support Email: support@pickupformmu.com\n"
-            "Support Phone: +60 123-456-789\n"
-            "Office Address: 123 MMU Street, Cyberjaya, Malaysia\n"
+            "Support Email: sjosiah52@gmail.com,\n"
+            "Support Phone: +60149237392\n"
+            "Office Address: Multimedia University, Cyberjaya, Malaysia\n"
             "Operating Hours: 9 AM - 6 PM, Monday to Friday"
         )
         contact_window = ctk.CTkToplevel(self)
@@ -165,10 +190,51 @@ class RouteMapApp(ctk.CTk):
 
         contact_label = ctk.CTkLabel(contact_window, text=contact_info, font=ctk.CTkFont(size=14), justify="left")
         contact_label.pack(padx=20, pady=20)
+        contact_window.lift()
 
-        back_button = ctk.CTkButton(contact_window, text="Back", command=contact_window.destroy, fg_color="#2600ff", hover_color="#555555")
-        back_button.pack(pady=10)
+    def show_about_info(self):
+        about_info = (
+            "About Us:\n\n"
+            "This is a ride booking application for MMU students.\n"
+            "Our goal is to provide a convenient and affordable way for students to travel to and from campus."
+        )
+        about_window = ctk.CTkToplevel(self)
+        about_window.title("About Us")
+        about_window.geometry("400x300")
 
+        about_label = ctk.CTkLabel(about_window, text=about_info, font=ctk.CTkFont(size=14), justify="left")
+        about_label.pack(padx=20, pady=20)
+        about_window.lift()
+
+    def show_services_info(self):
+        services_info = (
+            "Our Services:\n\n"
+            "We offer a range of services to make your travel experience convenient and comfortable.\n"
+            "Our services include:\n"
+            "- Competitive pricing"
+        )
+        services_window = ctk.CTkToplevel(self)
+        services_window.title("Our Services")
+        services_window.geometry("400x300")
+
+        services_label = ctk.CTkLabel(services_window, text=services_info, font=ctk.CTkFont(size=14), justify="left")
+        services_label.pack(padx=20, pady=20)
+        services_window.lift()
+
+    def show_home_info(self):
+        home_info = (
+            "Welcome to Pick-Up For MMU:\n\n"
+            "This is a ride booking application designed specifically for MMU students.\n"
+            "Book your ride now and experience the convenience of door-to-door pickup and dropoff."
+        )
+        home_window = ctk.CTkToplevel(self)
+        home_window.title("Home")
+        home_window.geometry("400x300")
+
+        home_label = ctk.CTkLabel(home_window, text=home_info, font=ctk.CTkFont(size=14), justify="left")
+        home_label.pack(padx=20, pady=20)
+        home_window.lift()
+        
     def book_now(self):
         pickup = self.pickup_entry.get()
         destination = self.destination_entry.get()
@@ -282,13 +348,19 @@ class RouteMapApp(ctk.CTk):
             "name": name,
             "phone": phone
         }
+
         try:
             response = requests.post("http://127.0.0.1:5003/book_ride", json=data)
             response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
-            print("Ride booked successfully!")
 
-            # Get the ride ID from the response
-            ride_id = response.json().get("ride_id")
+            response_data = response.json()
+            ride_id = response_data.get("ride_id")
+
+            if not ride_id:
+                print("Failed to get ride_id from the response")
+                return
+
+            print("Ride booked successfully!")
 
             # Create a new window to display ride details
             ride_details_window = tk.Toplevel(self)
@@ -298,69 +370,38 @@ class RouteMapApp(ctk.CTk):
             ride_details_label = tk.Label(ride_details_window, text="", font=("Helvetica", 12))
             ride_details_label.pack(pady=10)
 
-            # Fetch ride details from server
-            response = requests.get(f"http://127.0.0.1:5003/ride_details/{ride_id}")
-            if response.status_code == 200:
-                ride_details = response.json()["ride_details"]
-                ride_details_text = f"Ride ID: {ride_details['id']}\nPickup: {ride_details['pickup']}\nDestination: {ride_details['destination']}\nPrice: {ride_details['price']}"
-
-                # Add a label to display driver information
-                driver_info_label = tk.Label(ride_details_window, text="", font=("Helvetica", 12))
-                driver_info_label.pack(pady=10)
-
-                # Update the ride status and fetch driver information
-                def update_ride_status():
-                    response = requests.get(f"http://127.0.0.1:5003/accepted_ride/{ride_id}")
-                    if response.status_code == 200:
-                        ride_details = response.json()
-                        if ride_details.get("driver_name") and ride_details.get("driver_phone"):
-                            driver_info_text = f"Driver Name: {ride_details['driver_name']}\nPhone: {ride_details['driver_phone']}"
-                            driver_info_label.config(text=driver_info_text)
-                        else:
-                            driver_info_label.config(text="Waiting for driver to accept...")
-                    else:
-                        print(f"Failed to fetch ride status: {response.json().get('error')}")
-                        driver_info_label.config(text="Failed to fetch ride status", fg="red")
-                    ride_details_window.after(5000, update_ride_status)  # Update every 5 seconds
-
-                update_ride_status()  # Initial update
-
-                ride_details_label.configure(text=ride_details_text)
-            else:
-                print(f"Failed to fetch ride details: {response.json().get('error')}")
-                ride_details_label.configure(text="Failed to fetch ride details", fg="red")
-
-        except requests.exceptions.HTTPError as errh:
-            print("HTTP Error:", errh)
-        except requests.exceptions.ConnectionError as errc:
-            print("Error Connecting:", errc)
-        except requests.exceptions.Timeout as errt:
-            print("Timeout Error:", errt)
-        except requests.exceptions.RequestException as err:
-            print("Something went wrong", err)
-
-        # Clear the form fields
-        self.pickup_entry.delete(0, tk.END)
-        self.destination_entry.delete(0, tk.END)
-        self.price_entry.delete(0, tk.END)
-        self.user_entry.delete(0, tk.END)
-        self.phone_entry.delete(0, tk.END)
-
-        def update_ride_status():
-            response = requests.get(f"http://127.0.0.1:5003/accepted_ride/{ride_id}")
+            # Fetch ride details from server using the new endpoint
+            response = requests.get(f"http://127.0.0.1:5003/ride_detail/{ride_id}")
             if response.status_code == 200:
                 ride_details = response.json()
-                if ride_details.get("driver_name") and ride_details.get("driver_phone"):
-                    driver_info_text = f"Driver Name: {ride_details['driver_name']}\nPhone: {ride_details['driver_phone']}"
-                    driver_info_label.config(text=driver_info_text)
-                else:
-                    driver_info_label.config(text="Waiting for driver to accept...")
-            else:
-                print(f"Failed to fetch ride status: {response.json().get('error')}")
-                driver_info_label.config(text="Failed to fetch ride status", fg="red")
-            ride_details_window.after(5000, update_ride_status)  # Update every 5 seconds
 
-        update_ride_status()
+                # Ensure ride_details is a dictionary
+                if isinstance(ride_details, dict):
+                    ride_details_text = f"Ride ID: {ride_details.get('id')}\nPickup: {ride_details.get('pickup')}\nDestination: {ride_details.get('destination')}\nPrice: {ride_details.get('price')}"
+                    ride_details_label.config(text=ride_details_text)
+                else:
+                    ride_details_label.config(text="Invalid ride details format", fg="red")
+            else:
+                ride_details_label.config(text="Error fetching ride details", fg="red")
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
+            # Handle specific error cases as needed
+
+    def store_ride_details_in_database(self, ride_id, ride_details):
+        try:
+            conn = sqlite3.connect('rides.db')
+            c = conn.cursor()
+            
+            c.execute("INSERT INTO rides (pickup, destination, price, user_name, user_phone) VALUES (?, ?, ?, ?, ?, ?)",
+                      (ride_id, ride_details['pickup'], ride_details['destination'], ride_details['price'], ride_details['name'], ride_details['phone']))
+            
+            conn.commit()
+            conn.close()
+            
+            print(f"Ride details stored successfully in database for ride ID: {ride_id}")
+        except sqlite3.Error as e:
+            print(f"Error storing ride details in database: {e}")
     
     def on_confirm_ride_button_click(self):
         pickup = self.pickup_entry.get()
@@ -387,13 +428,13 @@ class RouteMapApp(ctk.CTk):
                 self.status_label.configure(text="Ride created successfully", fg="green")
 
                 # Create an instance of the RideDetailsApp
-                ride_details_app = RideDetailsApp(self,ride_id)
-                ride_details_app.mainloop()
+                #ride_details_app = UserRideConfirmation(self,ride_id)
+                #ride_details_app.mainloop()
 
                 # Clear the input fields
-                self.pickup_entry.delete(0, tk.END)
-                self.destination_entry.delete(0, tk.END)
-                self.price_entry.delete(0, tk.END)
+                #self.pickup_entry.delete(0, tk.END)
+               # self.destination_entry.delete(0, tk.END)
+                #self.price_entry.delete(0, tk.END)
             else:
                 self.status_label.configure(text="Failed to create ride", fg="red")
         except Exception as e:
