@@ -70,8 +70,7 @@ def get_users():
         cursor = conn.cursor()
         cursor.execute("SELECT mmu_id, name, phone FROM users")
         users = cursor.fetchall()
-        user_list = [{"mmu_id": user[0], "name": user[1], "phone": user[2]} for user in users]
-        return jsonify(user_list)
+        return render_template('admin_users.html', users=users)
 
 @app.route("/admin/delete_user", methods=["POST"])
 def delete_user():
