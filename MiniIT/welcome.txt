@@ -6,4 +6,6 @@ One more step left, please download the following libraries before using our app
 [customtkinter, flask, requests, tkintermapview, os]
 
 Please activate your virtual environment first before using 'pip install' in your command prompt to download these libraries. 
+Run app.py, app1.py, and app2, py first. After that run First_page.py.
+
 Thank you and have a great time using our app.
