@@ -1,13 +1,9 @@
-# app.py
-
 import requests
 from flask import Flask, request, jsonify, Response, render_template
 import sqlite3
 import hashlib
 
 app = Flask(__name__)
-
-# Utility functions
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -24,7 +20,6 @@ def verify_email(email):
     data = response.json()
     return data['data']['status'] == 'valid'
 
-# Routes
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -64,7 +59,7 @@ def login():
             return jsonify({"message": "Invalid credentials"}), 401
 
 @app.route("/admin/users", methods=["GET"])
-def get_admin_users():
+def get_users():
     auth = request.authorization
     if not auth or not check_admin_auth(auth.username, auth.password):
         return Response('Could not verify your access level for that URL.\n'
@@ -75,8 +70,8 @@ def get_admin_users():
         cursor = conn.cursor()
         cursor.execute("SELECT mmu_id, name, phone FROM users")
         users = cursor.fetchall()
-
-    return render_template('admin_users.html', users=users)
+        user_list = [{"mmu_id": user[0], "name": user[1], "phone": user[2]} for user in users]
+        return jsonify(user_list)
 
 @app.route("/admin/delete_user", methods=["POST"])
 def delete_user():

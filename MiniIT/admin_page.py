@@ -1,16 +1,65 @@
 import customtkinter
-import tkinter
+import admin_page2
+from tkinter import messagebox
+from argon2 import PasswordHasher, exceptions
+
+def fullscreen(window):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    if screen_width / screen_height > 16 / 9:
+        height = screen_height
+        width = int(height * 16 / 9)
+    else:
+        width = screen_width
+        height = int(width * 9 / 16)
+
+    window.geometry(f"{width}x{height}")
+    window.attributes('-fullscreen', True)
 
 def run_admin_page():
     customtkinter.set_appearance_mode("light")
     customtkinter.set_default_color_theme("dark-blue")
 
     root = customtkinter.CTk()
-    root = tkinter.Tk()
-    root.geometry("500x500")
+    root.title("Full Screen 16:9 Window")
+    root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
+
+    fullscreen(root)
+
+    ph = PasswordHasher()
+    allowed_users = {
+        "samthedon": ph.hash("test"),
+        "Liveradmin": ph.hash("admin2109"),
+        "aziffadmin": ph.hash("admin1602"),
+        "lecturersuhaini": ph.hash("mmuisyou")
+    }
+
+    login_attempts = {}
+
+    def callback_ap2():
+        admin_page2.open_admin_page()
 
     def login():
-        print("test")
+        username = entry1.get()
+        password = entry2.get()
+
+        if username in allowed_users:
+            try:
+                ph.verify(allowed_users[username], password)
+                callback_ap2()
+                return
+            except exceptions.VerifyMismatchError:
+                pass
+
+        if username not in login_attempts:
+            login_attempts[username] = 0
+        login_attempts[username] += 1
+
+        if login_attempts[username] > 3:
+            messagebox.showerror("Error", "Too many failed attempts. Try again later.")
+        else:
+            messagebox.showerror("Error", "Invalid username or password")
 
     special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
@@ -35,3 +84,5 @@ def run_admin_page():
     checkbox.place(relx=0.5, rely=0.75, anchor="center")
 
     root.mainloop()
+
+run_admin_page()
