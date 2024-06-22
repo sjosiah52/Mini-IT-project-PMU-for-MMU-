@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, request, jsonify, Response, render_template, redirect, url_for
+from flask import Flask, request, jsonify, Response, render_template
 import sqlite3
 import hashlib
 
@@ -19,6 +19,7 @@ def verify_email(email):
     response = requests.get(f'https://api.hunter.io/v2/email-verifier?email={email}&api_key={API_KEY}')
     data = response.json()
     return data['data']['status'] == 'valid'
+
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -40,7 +41,7 @@ def signup():
             conn.commit()
             return jsonify({"message": "Sign-up successful"}), 201
         except sqlite3.IntegrityError:
-                return jsonify({"message": "User already exists"}), 409
+            return jsonify({"message": "User already exists"}), 409
 
 @app.route("/login", methods=["POST"])
 def login():
