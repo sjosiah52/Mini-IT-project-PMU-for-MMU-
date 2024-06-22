@@ -1,26 +1,25 @@
 import customtkinter
 import requests
 import threading
-import subprocess
-import os 
+import subprocess, os
 
 customtkinter.set_appearance_mode("light")
-#customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("blue")
 
 def run_user_page2():
     def fullscreen(window):
-      screen_width = window.winfo_screenwidth()
-      screen_height = window.winfo_screenheight()
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
 
-      if screen_width / screen_height > 16/9:
+        if screen_width / screen_height > 16/9:
             height = screen_height
             width = int(height *16/9)
-      else:
+        else:
             width = screen_width
             height = int(width * 9/16)
 
-      window.geometry(f"{width}x{height}")
-      window.attributes('-fullscreen', True)
+        window.geometry(f"{width}x{height}")
+        window.attributes('-fullscreen', True)
 
     def sign_up():
         mmu_id = entry_id.get()
@@ -55,12 +54,10 @@ def run_user_page2():
         threading.Thread(target=validate_and_sign_up).start()
 
     def back_to_main():
-            root.withdraw
-            sample = os.path.join[os.path.dirname[__file__]["user_page.py"]]
-            subprocess.Popen(["python", sample])
+            script_path = os.path.join(os.path.dirname(__file__), "user_page.py")
+            subprocess.Popen(["python", script_path])
 
-
-    root = customtkinter.CTk() #Only create the CTk window
+    root = customtkinter.CTk()  # Only create the CTk window
     root.title("Full Screen 16:9 Window")
     root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 
@@ -72,17 +69,13 @@ def run_user_page2():
     frame = customtkinter.CTkFrame(master=root)
     frame.pack(fill="both", expand=True)
 
-    header_frame = customtkinter.CTkFrame(frame, corner_radius=0, fg_color="#ff0000")
-    header_frame.pack(fill="x")
+    label = customtkinter.CTkLabel(frame, text="Welcome to Pick Me Up for MMU!", font=special_font)
+    label.pack(pady=20, padx=20)
+    label.place(relx=0.5, rely=0.15, anchor="center")
 
-
-    label = customtkinter.CTkLabel(header_frame, text="Welcome to Pick Me Up for MMU!", font=special_font, text_color="#fcfbfa")
-    label.pack(pady=10, padx=10)
-    label.place(relx=0.5, rely=0.4, anchor="center")
-
-    label1 = customtkinter.CTkLabel(frame, text="Please sign up for our app using your MMU Id, Name, and Phone Number. Next time you can just login using your ID and Password.", font=normal_font)
+    label1 = customtkinter.CTkLabel(frame, text="Please sign up for our app using your MMU ID, Name, Phone Number, and Password. Next time you can just login using your ID and Password.", font=normal_font)
     label1.pack(pady=20, padx=20)
-    label1.place(relx=0.5, rely=0.31, anchor="center")
+    label1.place(relx=0.5, rely=0.25, anchor="center")
 
     entry_id = customtkinter.CTkEntry(frame, placeholder_text="MMU ID")
     entry_id.pack(pady=10)
@@ -104,9 +97,9 @@ def run_user_page2():
     button_sign_up.pack(pady=20)
     button_sign_up.place(relx=0.5, rely=0.75, anchor="center")
 
-    label_message = customtkinter.CTkLabel(frame, text="")
+    label_message = customtkinter.CTkLabel(master=frame, text="")
     label_message.pack(pady=20)
-    label_message.place(relx=0.9, rely=0.85, anchor="center")
+    label_message.place(relx=0.5, rely=0.85, anchor="center")
 
     back_button = customtkinter.CTkButton(master=frame, text="Back", command=back_to_main)
     back_button.place(relx=0.075, rely=0.95, anchor="center")
