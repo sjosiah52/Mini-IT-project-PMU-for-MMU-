@@ -4,7 +4,7 @@ import threading
 import time
 import user_signup
 import subprocess
-#from maptester import App  
+import os 
 
 def run_user_page():
     customtkinter.set_appearance_mode("light")
@@ -46,8 +46,9 @@ def run_user_page():
                 if response.status_code == 200:
                     label_message.configure(text="Login successful", text_color="green")
                     time.sleep(1)  # Ensure there's a slight delay before closing
-                    root.withdraw()  # Hide the login window
-                    subprocess.Popen(["python", "route_map_app.py"])
+                    root.withdraw()
+                    script_path = os.path.join(os.path.dirname(__file__), "route_map_app.py")  
+                    subprocess.Popen(["python", script_path])
                 elif response.status_code == 401:
                     label_message.configure(text="Invalid credentials", text_color="red")
                 else:
@@ -66,7 +67,7 @@ def run_user_page():
         root.withdraw
         script_path2 = os.path.join(os.path.dirname(__file__), "user_signup.py")
         subprocess.Popen(["python", script_path2])
-
+        
     special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
     frame = customtkinter.CTkFrame(master=root)
