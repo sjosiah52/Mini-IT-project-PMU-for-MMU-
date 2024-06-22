@@ -67,7 +67,7 @@ class RouteMapApp(ctk.CTk):
         self.destination_entry.pack(pady=5)
 
         # User Name
-        user_label = ctk.CTkLabel(form_frame, text="Name(Please use this name to check you ride details later):  ")
+        user_label = ctk.CTkLabel(form_frame, text="Name(Please use this name to check your ride details later):  ")
         user_label.pack(anchor="w", pady=5)
 
         self.user_entry = ctk.CTkEntry(form_frame, width=300)
