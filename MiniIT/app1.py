@@ -72,7 +72,7 @@ def get_drivers():
         cursor = conn.cursor()
         cursor.execute("SELECT mmu_id, ic_number, vehicle_registration_number FROM drivers")
         drivers = cursor.fetchall()
-        return render_template('admin_driver.html', drivers=drivers)
+        return render_template('admin_driver.html', users=drivers)
 
 @app1.route("/admin/delete_drivers", methods=["POST"])
 def delete_drivers():
