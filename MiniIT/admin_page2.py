@@ -59,7 +59,7 @@ def open_admin_page():
     button1 = customtkinter.CTkButton(master=frame, fg_color="blue", text="View Users' Data", command=view_users_data)
     button1.place(relx=0.5, rely=0.5, anchor="center")
 
-    button2 = customtkinter.CTkButton(master=frame, fg_color="white", text="View Drivers' Data", command=view_drivers_data)
+    button2 = customtkinter.CTkButton(master=frame, fg_color="blue", text="View Drivers' Data", command=view_drivers_data)
     button2.place(relx=0.5, rely=0.63, anchor="center")
 
     button3 = customtkinter.CTkButton(master=frame, fg_color="blue", text="Delete Users' Data", command=delete_users_data)
