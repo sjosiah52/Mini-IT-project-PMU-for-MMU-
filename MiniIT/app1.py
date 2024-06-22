@@ -69,8 +69,7 @@ def get_drivers():
         cursor = conn.cursor()
         cursor.execute("SELECT mmu_id, ic_number, vehicle_registration_number FROM drivers")
         drivers = cursor.fetchall()
-        driver_list = [{"mmu_id": driver[0], "ic_number": driver[1], "vehicle_registration_number": driver[2]} for driver in drivers]
-        return jsonify(driver_list)
+        return render_template('admin_drivers.html', users=drivers)
 
 @app1.route("/admin/delete_drivers", methods=["POST"])
 def delete_drivers():
