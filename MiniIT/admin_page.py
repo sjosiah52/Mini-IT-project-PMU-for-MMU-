@@ -1,7 +1,7 @@
 import customtkinter
 import admin_page2
 from tkinter import messagebox
-from argon2 import PasswordHasher, exceptions
+import hashlib
 
 def fullscreen(window):
     screen_width = window.winfo_screenwidth()
@@ -27,14 +27,18 @@ def run_admin_page():
 
     fullscreen(root)
 
-    ph = PasswordHasher()
-    allowed_users = {
-        "samthedon": ph.hash("test"),
-        "Liveradmin": ph.hash("admin2109"),
-        "aziffadmin": ph.hash("admin1602"),
-        "lecturersuhaini": ph.hash("mmuisyou")
-    }
+    def hash_password(password):
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+    def verify_password(stored_password, provided_password):
+        return stored_password == hash_password(provided_password)
+
+    allowed_users = {
+        "samthedon": hash_password("test"),
+        "Liveradmin": hash_password("admin2109"),
+        "aziffadmin": hash_password("admin1602"),
+        "lecturersuhaini": hash_password("mmuisyou")
+    }
     login_attempts = {}
 
     def callback_ap2():
@@ -45,13 +49,9 @@ def run_admin_page():
         password = entry2.get()
 
         if username in allowed_users:
-            try:
-                ph.verify(allowed_users[username], password)
+            if verify_password(allowed_users[username], password):
                 callback_ap2()
                 return
-            except exceptions.VerifyMismatchError:
-                pass
-
         if username not in login_attempts:
             login_attempts[username] = 0
         login_attempts[username] += 1
@@ -79,9 +79,6 @@ def run_admin_page():
 
     button = customtkinter.CTkButton(master=frame, fg_color="red", text="Login", command=login)
     button.place(relx=0.5, rely=0.63, anchor="center")
-
-    checkbox = customtkinter.CTkCheckBox(master=frame, text="Remember Me")
-    checkbox.place(relx=0.5, rely=0.75, anchor="center")
 
     root.mainloop()
 
