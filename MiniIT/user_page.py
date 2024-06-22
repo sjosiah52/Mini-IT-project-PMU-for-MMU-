@@ -4,7 +4,6 @@ import threading
 import time
 import user_signup
 import subprocess
-from maptester import App  
 
 def run_user_page():
     customtkinter.set_appearance_mode("light")
