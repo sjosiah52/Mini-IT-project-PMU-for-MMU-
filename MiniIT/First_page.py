@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import subprocess
+from PIL import Image, ImageTk
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("dark-blue")
@@ -25,12 +26,15 @@ root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 fullscreen(root)
 
 def callback_ap():
+    root.withdraw()
     subprocess.Popen(["python", "admin_page.py"])
 
 def callback_up():
+    root.withdraw()
     subprocess.Popen(["python", "user_page.py"])
 
 def callback_dp():
+    root.withdraw()
     subprocess.Popen(["python", "driver_page.py"])
 
 def create_ui(root):
@@ -44,6 +48,8 @@ def create_ui(root):
     # Navigation
     nav_frame = ctk.CTkFrame(root)
     nav_frame.pack(fill="x", pady=10)
+
+   
 
     nav_buttons = ["Home", "About", "Services", "Contact"]
     for btn_text in nav_buttons:
@@ -86,6 +92,7 @@ def create_ui(root):
 
     admin_login = ctk.CTkButton(root, text="Admin", command=callback_ap, fg_color="#ffffff")
     admin_login.place(relx="0.93", rely="0.9", anchor="center")
+
 
 def nav_command(text):
     print(f"Navigation button '{text}' clicked")
