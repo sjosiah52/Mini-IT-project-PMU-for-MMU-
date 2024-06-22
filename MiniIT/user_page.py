@@ -4,6 +4,7 @@ import threading
 import time
 import user_signup
 import subprocess
+#from maptester import App  
 
 def run_user_page():
     customtkinter.set_appearance_mode("light")
@@ -59,14 +60,22 @@ def run_user_page():
     def callback_up2():
         user_signup.run_user_page2()
         
+    def back_to_main():
+            root.withdraw
+            subprocess.Popen(["python", "First_page.py"])
+         
+
     special_font = customtkinter.CTkFont(family="Helvetica", size=32, weight="bold", underline=True, slant='italic')
 
     frame = customtkinter.CTkFrame(master=root)
     frame.pack(fill="both", expand=True)
 
-    label = customtkinter.CTkLabel(root, text="Login System for Users", font=special_font)
+    header_frame = customtkinter.CTkFrame(frame, corner_radius=0, fg_color="#ff0000")
+    header_frame.pack(fill="x")
+
+    label = customtkinter.CTkLabel(root, text="Login System for Users", font=special_font,bg_color="#ff0000",text_color="#fffefc")
     label.pack(pady=0, padx=0)
-    label.place(relx=0.5, rely=0.25, anchor="center")
+    label.place(relx=0.5, rely=0.15, anchor="center")
 
     entry1 = customtkinter.CTkEntry(master=frame, justify='center', placeholder_text="MMU Id")
     entry1.pack(pady=12, padx=10)
@@ -78,8 +87,8 @@ def run_user_page():
     button = customtkinter.CTkButton(master=frame, fg_color="red", text="Login", command=login)
     button.place(relx=0.5, rely=0.63, anchor="center")
 
-    checkbox = customtkinter.CTkCheckBox(master=frame, text="Remember Me")
-    checkbox.place(relx=0.5, rely=0.75, anchor="center")
+    back_button = customtkinter.CTkButton(master=frame, text="Back", command=back_to_main)
+    back_button.place(relx=0.075, rely=0.95, anchor="center")
 
     button1 = customtkinter.CTkButton(master=frame, text="Click here to sign up.", command=callback_up2)
     button1.place(relx=0.5, rely= 0.87, anchor="center")
