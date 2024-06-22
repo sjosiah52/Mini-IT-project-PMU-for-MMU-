@@ -2,6 +2,7 @@ import sqlite3
 import hashlib
 import requests
 from flask import Flask, request, jsonify, Response, render_template
+from init1_db import initialize_database
 
 app1 = Flask(__name__)
 
@@ -19,6 +20,8 @@ def verify_email(email):
     response = requests.get(f'https://api.hunter.io/v2/email-verifier?email={email}&api_key={API_KEY}')
     data = response.json()
     return data['data']['status'] == 'valid'
+
+initialize_database()
 
 @app1.route("/driver_signup", methods=["POST"])
 def driver_signup():
