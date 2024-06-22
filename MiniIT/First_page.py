@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import subprocess
-from PIL import Image, ImageTk
+import os
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("dark-blue")
@@ -26,19 +26,79 @@ root.bind("<Escape>", lambda e: root.attributes('-fullscreen', False))
 fullscreen(root)
 
 def callback_ap():
-    root.withdraw()
-    subprocess.Popen(["python", "admin_page.py"])
+    script_path = os.path.join(os.path.dirname(__file__), "admin_page.py")
+    subprocess.Popen(["python", script_path])
 
 def callback_up():
-    root.withdraw()
-    subprocess.Popen(["python", "user_page.py"])
+    script_path1 = os.path.join(os.path.dirname(__file__), "user_page.py")
+    subprocess.Popen(["python", script_path1])
 
 def callback_dp():
-    root.withdraw()
-    subprocess.Popen(["python", "driver_page.py"])
+    script_path2 = os.path.join(os.path.dirname(__file__), "driver_page.py")
+    subprocess.Popen(["python", script_path2])
 
 def create_ui(root):
     # Header
+    def show_contact_info():
+        contact_info = (
+            "Contact Us:\n\n"
+            "Support Email: sjosiah52@gmail.com, azifffizrie2@gmail.com, liverneshk24@gmail.com\n"
+            "Support Phone: +60149237392\n"
+            "Office Address: Multimedia University, Cyberjaya, Malaysia\n"
+            "Operating Hours: 9 AM - 6 PM, Monday to Friday"
+        )
+        contact_window = ctk.CTkToplevel()
+        contact_window.title("Contact Information")
+        contact_window.geometry("800x600")
+
+        contact_label = ctk.CTkLabel(contact_window, text=contact_info, font=ctk.CTkFont(size=14), justify="left")
+        contact_label.pack(padx=20, pady=20)
+        contact_window.lift()
+
+    def show_about_info():
+        about_info = (
+            "About Us:\n\n"
+            "This is a ride booking application for MMU students.\n"
+            "Our goal is to provide a convenient and affordable way for students to travel to and from campus."
+        )
+        about_window = ctk.CTkToplevel()
+        about_window.title("About Us")
+        about_window.geometry("800x600")
+
+        about_label = ctk.CTkLabel(about_window, text=about_info, font=ctk.CTkFont(size=14), justify="left")
+        about_label.pack(padx=20, pady=20)
+        about_window.lift()
+
+    def show_services_info():
+        services_info = (
+            "Our Services:\n\n"
+            "We offer a range of services to make your travel experience convenient and comfortable.\n"
+            "Our services include:\n"
+            "- Competitive pricing"
+        )
+        services_window = ctk.CTkToplevel()
+        services_window.title("Our Services")
+        services_window.geometry("800x600")
+
+        services_label = ctk.CTkLabel(services_window, text=services_info, font=ctk.CTkFont(size=14), justify="left")
+        services_label.pack(padx=20, pady=20)
+        services_window.lift()
+
+    def show_home_info():
+        home_info = (
+            "Welcome to Pick-Up For MMU:\n\n"
+            "This is a ride booking application designed specifically for MMU students.\n"
+            "Book your ride now and experience the convenience of door-to-door pickup and dropoff."
+        )
+        
+        home_window = ctk.CTkToplevel()
+        home_window.title("Home")
+        home_window.geometry("800x600")
+
+        home_label = ctk.CTkLabel(home_window, text=home_info, font=ctk.CTkFont(size=14), justify="left")
+        home_label.pack(padx=20, pady=20)
+        home_window.lift()
+    
     header_frame = ctk.CTkFrame(root, corner_radius=0, fg_color="#ff0000")
     header_frame.pack(fill="x")
 
@@ -49,15 +109,21 @@ def create_ui(root):
     nav_frame = ctk.CTkFrame(root)
     nav_frame.pack(fill="x", pady=10)
 
-   
-
     nav_buttons = ["Home", "About", "Services", "Contact"]
     for btn_text in nav_buttons:
         if btn_text == "Contact":
             btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=show_contact_info, fg_color="#ff0000", hover_color="#555555")
+        elif btn_text == "About":
+            btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=show_about_info, fg_color="#ff0000", hover_color="#555555")
+        elif btn_text == "Services":
+            btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=show_services_info, fg_color="#ff0000", hover_color="#555555")
         else:
-            btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=lambda text=btn_text: nav_command(text), fg_color="#ff0000", hover_color="#555555")
-        btn.pack(side="left", expand=True, padx=5, pady=5)
+            btn = ctk.CTkButton(nav_frame, text=btn_text, text_color="#ffffff", command=show_home_info, fg_color="#ff0000", hover_color="#555555")
+        btn.pack(side="left", padx=5, pady=5)
+    
+    def nav_command(self, text):
+        print(f"Navigation button '{text}' clicked")
+
 
     # Main Content
     main_frame = ctk.CTkFrame(root)
