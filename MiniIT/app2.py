@@ -66,7 +66,7 @@ def get_available_rides():
     try:
         conn = sqlite3.connect('rides.db')
         c = conn.cursor()
-        c.execute("SELECT id, pickup, destination, price FROM rides WHERE driver_name IS NULL AND status = 'pending'")
+        c.execute("SELECT id, pickup, destination, price, user_name FROM rides WHERE driver_name IS NULL AND status = 'pending'")
         rides = c.fetchall()
         conn.close()
         
@@ -76,7 +76,8 @@ def get_available_rides():
                 "id": ride[0],
                 "pickup": ride[1],
                 "destination": ride[2],
-                "price": ride[3]
+                "price": ride[3],
+                "user_name":ride[4]
             }
             rides_list.append(ride_data)
         
